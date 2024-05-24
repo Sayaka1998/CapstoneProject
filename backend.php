@@ -130,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $newPass = password_hash($_POST["newPass"], PASSWORD_BCRYPT, ["cost" => 10]);
                             $updatePass = "UPDATE user_tb SET pass = '" . $newPass . "' WHERE uid = " . $_SESSION["loginUser"]["uid"];
                             $dbCon->query($updatePass);
-                            echo json_encode(["message" => "Your password is updated successfully!"]);
+                            echo json_encode(["success" => "Your password is updated successfully!"]);
                             $dbCon->close();
                             $_SESSION["loginUser"]["pass"] = $newPass; // change the login user password
                         }
@@ -155,12 +155,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         } else { // if the sent email and password matches the login user ones, delete the user account
                             $delUser = "DELETE FROM user_tb WHERE uid = " . $_SESSION["loginUser"]["uid"];
                             $dbCon->query($delUser);
-                            echo json_encode(["message" => "Your acount is deleted successfully!"]);
+                            echo json_encode(["success" => "Your acount is deleted successfully!"]);
                             $dbCon->close();
                             // stop session because the login user data is deleted
                             session_unset();
                             session_destroy();
                         }
+                    }
+                } else {
+                    echo json_encode(["logout" => "Login first."]);
+                }
+                break;
+
+                //load tickets data
+            case "/ticket":
+                if(isset($_SESSION["loginUser"])) {
+                    $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
+                    if ($dbCon->connect_error) {
+                        echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
+                        $dbCon->close();
+                    } else {
+                        $selectTck = "SELECT * FROM ticket_tb";
+                        $result = $dbCon->query($selectTck);
+                        $ticketList = [];
+                        if($result->num_rows > 0) {
+                            while($ticket = $result->fetch_assoc()){
+                                array_push($ticketList, $ticket);
+                            }
+                        }
+                        echo json_encode($ticketList);
+                        $dbCon->close();
                     }
                 } else {
                     echo json_encode(["logout" => "Login first."]);
@@ -178,14 +202,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $allTickets = json_decode($_POST["ticket"]);
                         // save the bought tickets data to the database
                         foreach ($allTickets as $ticket) {
-                            $insertCmd = $dbCon->prepare("INSERT INTO ticket_tb (uid, bdate, type, vdate, time, number) VALUES (?,?,?,?,?,?)");
+                            $insertCmd = $dbCon->prepare("INSERT INTO order_tb (uid, bdate, type, number, total) VALUES (?,?,?,?,?)");
                             $bdate = date("Y-m-d"); // the date the user buy tickets
-                            $insertCmd->bind_param("issssi", $_SESSION["loginUser"]["uid"], $bdate, $ticket->type, $ticket->vdate, $ticket->time, $ticket->number);
+                            $insertCmd->bind_param("issii", $_SESSION["loginUser"]["uid"], $bdate, $ticket->type, $ticket->number, $ticket->total);
                             $insertCmd->execute();
                         }
                         $insertCmd->close();
                         $dbCon->close();
-                        echo json_encode(["message" => "Success to buy tickets!"]);
+                        echo json_encode(["success" => "Success to buy tickets!"]);
                     }
                 } else {
                     echo json_encode(["logout" => "Login first."]);
@@ -201,7 +225,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $dbCon->close();
                     } else {
                         // select the date the user bought tickets, the tickets type, the visit date, the visit time, the number of tickets from the history_tb
-                        $selectCmd = "SELECT bdate,type,vdate,time,number FROM ticket_tb WHERE uid = " . $_SESSION["loginUser"]["uid"];
+                        $selectCmd = "SELECT oid,bdate,type,number,total FROM order_tb WHERE uid = " . $_SESSION["loginUser"]["uid"];
                         $result = $dbCon->query($selectCmd);
                         $history = [];
                         if ($result->num_rows > 0) { // if the login user has bought tickets, send the tickets data to frontend
