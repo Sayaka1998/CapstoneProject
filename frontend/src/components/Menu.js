@@ -46,20 +46,26 @@ function Menu() {
                             <li className="nav-item" style = {{display: sessionStorage.getItem("sid") ? "block":"none"}}>
                                 <Link to="/ticket" className="nav-link fw-bolder">Ticket</Link>
                             </li>
-                            <li className="nav-item" style = {{display: sessionStorage.getItem("sid") ? "block":"none"}}>
+                            <li className="nav-item" style = {{display: sessionStorage.getItem("type") == "Customer" ? "block":"none"}}>
                                 <Link to="/history" className="nav-link fw-bolder">Order History</Link>
                             </li>
                             <li className="nav-item" style = {{display: !(sessionStorage.getItem("sid")) ? "block":"none"}}>
                                 <Link to="/login" className="nav-link fw-bolder">Log in</Link>
                             </li>
                             <li className="nav-item" style = {{display: !(sessionStorage.getItem("sid")) ? "block":"none"}}>
-                                <Link to="/register" className="nav-link fw-bolder">Registration</Link>
+                                <Link to="/registerAccount" className="nav-link fw-bolder">Account Registration</Link>
+                            </li>
+                            <li className="nav-item" style = {{display: (sessionStorage.getItem("Staff") || sessionStorage.getItem("type") == "Admin") ? "block":"none"}}>
+                                <Link to="/registerStaff" className="nav-link fw-bolder">Staff Registration</Link>
                             </li>
                             <li className="nav-item" style = {{display: sessionStorage.getItem("sid") ? "block":"none"}}>
                                 <Link to="/change" className="nav-link fw-bolder">Change Password</Link>
                             </li>
-                            <li className="nav-item" style = {{display: sessionStorage.getItem("sid") ? "block":"none"}}>
-                                <Link to="/delete" className="nav-link fw-bolder">Delete account</Link>
+                            <li className="nav-item" style = {{display: sessionStorage.getItem("type") == "Customer" ? "block":"none"}}>
+                                <Link to="/deleteAccount" className="nav-link fw-bolder">Delete Account</Link>
+                            </li>
+                            <li className="nav-item" style = {{display: sessionStorage.getItem("type") == "Staff" || sessionStorage.getItem("type") == "Admin" ? "block":"none"}}>
+                                <Link to="/deleteUser" className="nav-link fw-bolder">Delete User</Link>
                             </li>
                         </ul>
                     </div>

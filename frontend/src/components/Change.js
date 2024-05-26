@@ -39,6 +39,7 @@ function Change() {
                     alert(res.data.logout)
                     sessionStorage.removeItem("sid")
                     sessionStorage.removeItem("user")
+                    sessionStorage.removeItem("type")
                     nav("/login")
                 }
             },

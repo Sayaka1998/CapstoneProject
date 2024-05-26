@@ -19,6 +19,7 @@ function History() {
                         alert(res.data.logout)
                         sessionStorage.removeItem("sid")
                         sessionStorage.removeItem("user")
+                        sessionStorage.removeItem("type")
                         nav("/login")
                     } else if (Array.isArray(res.data)) { // if success, set the data as order
                         setOrder(res.data)

@@ -8,12 +8,14 @@ function Login() {
     const [show, setShow] = useState(false) // show password
     const [sid, setSid] = useState("")
     const [user, setUser] = useState([])
+    const [type, setType] = useState("")
     const nav = useNavigate()
 
     useEffect(() => {
-        if (sid) { // if session id is set, set session id snd user data to session storage
+        if (sid) { // if session id is set, set session id ,type and user data to session storage
             sessionStorage.setItem("sid", sid)
             sessionStorage.setItem("user", user)
+            sessionStorage.setItem("type", type)
             nav("/");
         }
     }, [sid, user, nav]);
@@ -28,6 +30,7 @@ function Login() {
                 } else { // set the data to session id and user data
                     setSid(res.data.sid)
                     setUser(JSON.stringify(res.data.user))
+                    setType(res.data.type)
                 }
             },
             rej => {
@@ -43,6 +46,13 @@ function Login() {
                 <div className="row justify-content-center align-items-center g-2">
                     <div className="col-4">
                         <form onSubmit={submitHandle}>
+                            <div className="form-floating mb-3">
+                                <select className="form-select form-select-lg" name="type">
+                                    <option defaultValue>Customer</option>
+                                    <option>Staff</option>
+                                    <option>Admin</option>
+                                </select>
+                            </div>
                             <div className="form-floating mb-3">
                                 <input type="email" className="form-control" name="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email Address" required />
                                 <label htmlFor="email">Email</label>

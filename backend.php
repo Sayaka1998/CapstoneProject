@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
                 if (session_status() === 2) { // if session works, return the user type and session id to the front-end
                     $userData = ["fname" => $_SESSION["loginUser"]["fname"], "lname" => $_SESSION["loginUser"]["lname"]];
-                    $response = ["user" => $userData, "sid" => session_id()];
+                    $response = ["user" => $userData, "type" => $_SESSION["loginUser"]["type"], "sid" => session_id()];
                     echo json_encode($response);
                 } else if ($loginUser === null) { // if the email/password/type is wrong.
                     echo json_encode(["message" => "email/password is wrong."]);
@@ -80,8 +80,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
                 break;
 
-                // register user data
-            case "/register":
+                // register customer data
+            case "/registerAccount":
                 $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
                 if ($dbCon->connect_error) {
                     echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
@@ -95,11 +95,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         echo json_encode(["message" => "Email already exists. Please choose a different email."]);
                     } else { // If the email doesn't exist, proceed with registration
                         // Insert user data into the appropriate table
-                        $insertQuery = "INSERT INTO user_tb (fname, lname, email, pass) VALUES (?, ?, ?, ?)";
+                        $insertQuery = "INSERT INTO user_tb (fname, lname, email, pass, type) VALUES (?, ?, ?, ?, ?)";
                         $stmtInsert = $dbCon->prepare($insertQuery);
                         // hash password
                         $pass = password_hash($_POST["pass"], PASSWORD_BCRYPT, ["cost" => 10]);
-                        $stmtInsert->bind_param("ssss", $_POST["fname"], $_POST["lname"], $_POST["email"], $pass);
+                        $type = "Customer";
+                        $stmtInsert->bind_param("ssssS", $_POST["fname"], $_POST["lname"], $_POST["email"], $pass, $type);
 
                         if ($stmtInsert->execute()) {
                             // Registration successful
@@ -111,6 +112,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $stmtInsert->close();
                         $dbCon->close();
                     }
+                }
+                break;
+
+                //register staff data
+            case "/registerStaff":
+                if (isset($_SESSION["loginUser"]) && ($_SESSION["loginUser"]["type"] === "Staff" || $_SESSION["loginUser"]["type"] === "Admin")) { //check if the user login and if the user type is Staff or Admin
+                    $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
+                    if ($dbCon->connect_error) {
+                        echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
+                        $dbCon->close();
+                    } else {
+                        // Check if the email already exists in the appropriate table
+                        $checkEmailQuery = "SELECT email FROM user_tb WHERE email = '" . $_POST["email"] . "'";
+                        $result = $dbCon->query($checkEmailQuery);
+                        if ($result->num_rows > 0) {
+                            // Email already exists
+                            echo json_encode(["message" => "Email already exists. Please choose a different email."]);
+                        } else { // If the email doesn't exist, proceed with registration
+                            // Insert user data into the appropriate table
+                            $insertQuery = "INSERT INTO user_tb (fname, lname, email, pass, type) VALUES (?, ?, ?, ?, ?)";
+                            $stmtInsert = $dbCon->prepare($insertQuery);
+                            // hash password
+                            $pass = password_hash($_POST["pass"], PASSWORD_BCRYPT, ["cost" => 10]);
+                            $type = "Staff";
+                            $stmtInsert->bind_param("ssssS", $_POST["fname"], $_POST["lname"], $_POST["email"], $pass, $type);
+
+                            if ($stmtInsert->execute()) {
+                                // Registration successful
+                                echo json_encode(["success" => "Registration successful!"]);
+                            } else {
+                                echo json_encode(["message" => "Error"]);
+                            }
+
+                            $stmtInsert->close();
+                            $dbCon->close();
+                        }
+                    }
+                } else {
+                    echo json_encode(["logout" => "Login first."]);
                 }
                 break;
 
@@ -141,7 +181,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 break;
 
                 //delete login user data
-            case "/delete":
+            case "/deleteAccount":
                 if (isset($_SESSION["loginUser"])) { //check if the user login 
                     $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
                     if ($dbCon->connect_error) {
@@ -167,9 +207,77 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
                 break;
 
+                //load user data
+            case "/ulist":
+                if (isset($_SESSION["loginUser"]) && ($_SESSION["loginUser"]["type"] == "Staff" || $_SESSION["loginUser"]["type"] == "Admin")) { //check if the user login and if the user type is Staff or Admin
+                    $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
+                    if ($dbCon->connect_error) {
+                        echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
+                        $dbCon->close();
+                    } else {
+                        if ($_SESSION["loginUser"]["type"] == "Staff") { // staff can delete only customer data
+                            $selectUlist = "SELECT uid,fname,lname,email,type FROM user_tb WHERE type = 'Customer'";
+                            $result = $dbCon->query($selectUlist);
+                            $userList = [];
+                            if ($result->num_rows > 0) { // if customer data exists in the user_tb, send the data to  the frontend 
+                                while ($user = $result->fetch_assoc()) {
+                                    array_push($userList, $user);
+                                }
+                                echo json_encode($userList);
+                            } else {
+                                echo json_encode(["message" => "No user data."]);
+                            }
+                        } else if ($_SESSION["loginUser"]["type"] == "Admin") { // admin can delete customer and staff data
+                            $selectUlist = "SELECT uid,fname,lname,email,type FROM user_tb WHERE type = 'Customer' OR type = 'Staff'";
+                            $result = $dbCon->query($selectUlist);
+                            $userList = [];
+                            if ($result->num_rows > 0) { // if user data exists in the user_tb, send the data to the frontend
+                                while ($user = $result->fetch_assoc()) {
+                                    array_push($userList, $user);
+                                }
+                                echo json_encode($userList);
+                            } else {
+                                echo json_encode(["message" => "No user data."]);
+                            }
+                        }
+                    }
+                } else {
+                    echo json_encode(["logout" => "Login first."]);
+                }
+                break;
+
+                //delete staff data and black list data
+            case "/deleteUser":
+                if (isset($_SESSION["loginUser"]) && ($_SESSION["loginUser"]["type"] === "Staff" || $_SESSION["loginUser"]["type"] === "Admin")) { //check if the user login and if the user type is Staff or Admin
+                    $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
+                    if ($dbCon->connect_error) {
+                        echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
+                        $dbCon->close();
+                    } else {
+                        $userData = json_encode($_POST["userData"]);
+                        if ($_SESSION["loginUser"]["uid"] === $userData["uid"]) { // staff and admin can't delete their own data
+                            echo json_encode(["message" => "You can't delete your own data."]);
+                        } else {
+                            $checkBlk = "SELECT uid FROM blacklist_tb WHERE uid = " . $userData["uid"];
+                            $result = $dbCon->query($checkBlk);
+                            if ($result->num_rows > 0) { // if the user data exists in tha black list, delete the data from the black list
+                                $delBlkUser = "DELETE FROM blacklist_tb WHERE uid = " . $userData["uid"];
+                                $dbCon->query($delBlkUser);
+                            }
+                            $delUser = "DELETE FROM user_tb WHERE uid = " . $userData["uid"];
+                            $dbCon->query($delUser);
+                            $dbCon->close();
+                            echo json_encode(["success" => "The staff is deleted successfully!"]);
+                        }
+                    }
+                } else {
+                    echo json_encode(["logout" => "Login first."]);
+                }
+                break;
+
                 //load tickets data
             case "/ticket":
-                if(isset($_SESSION["loginUser"])) {
+                if (isset($_SESSION["loginUser"])) {
                     $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
                     if ($dbCon->connect_error) {
                         echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
@@ -178,8 +286,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $selectTck = "SELECT * FROM ticket_tb";
                         $result = $dbCon->query($selectTck);
                         $ticketList = [];
-                        if($result->num_rows > 0) {
-                            while($ticket = $result->fetch_assoc()){
+                        if ($result->num_rows > 0) {
+                            while ($ticket = $result->fetch_assoc()) {
                                 array_push($ticketList, $ticket);
                             }
                         }
@@ -235,6 +343,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         }
                         echo json_encode($history);
                         $dbCon->close();
+                    }
+                } else {
+                    echo json_encode(["logout" => "Login first."]);
+                }
+                break;
+
+                //add tickets data
+            case "/addTickets":
+                if (isset($_SESSION["loginUser"]) && ($_SESSION["loginUser"]["type"] === "Staff" || $_SESSION["loginUser"]["type"] === "Admin")) { // staff and admin can add new tickets data
+                    $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
+                    if ($dbCon->connect_error) {
+                        echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
+                        $dbCon->close();
+                    } else {
+                        $selectTckData = "SELECT type FROM ticket_tb WHERE type = '" . $_POST["type"] . "'";
+                        $result = $dbCon->query($selectTckData);
+                        if ($result->num_rows > 0) { // if the ticket type already exists, can't add 
+                            echo json_encode(["message" => "Registration failed!"]);
+                        } else {
+                            $insertTck = $dbCon->prepare("INSERT INTO ticket_tb (type, price) VALUES (?,?)");
+                            $insertTck->bind_param("si", $_POST["type"], $_POST["price"]);
+                            if ($insertTck->execute()) {
+                                echo json_encode(["success" => "Record added."]);
+                            } else {
+                                echo json_encode(["message" => "Error: " . $insertTck->error]);
+                            }
+                            $insertTck->close();
+                        }
+                        $dbCon->close();
+                    }
+                } else {
+                    echo json_encode(["logout" => "Login first."]);
+                }
+                break;
+
+                //delete tickets data
+            case "/deleteTickets":
+                if (isset($_SESSION["loginUser"]) && ($_SESSION["loginUser"]["type"] === "Staff" || $_SESSION["loginUser"]["type"] === "Admin")) {
+                    $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
+                    if ($dbCon->connect_error) {
+                        echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
+                        $dbCon->close();
+                    } else {
+                        $ticketData = json_encode($_POST["ticketData"]);
+                        $delTck = "DELETE FROM ticket_tb WHERE tid = " . $ticketData["tid"];
+                        $dbCon->query($delTck);
+                        $dbCon->close();
+                        echo json_encode(["success" => "This ticket is deleted successfully."]);
                     }
                 } else {
                     echo json_encode(["logout" => "Login first."]);
