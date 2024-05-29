@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Check if the last activity time is set
             if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] > time()) {
                 // Update the last activity timestamp
-                $_SESSION["last_activity"] = time() + 600;
+                $_SESSION["last_activity"] = time() + 10;
             } else { // the session expires if more than 10 minutes have passed
                 session_unset();
                 session_destroy();
@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $dbCon->close();
                 } else {
                     // Query to check if the entered email match a record in the database
-                    $result = $dbCon->query("SELECT * FROM user_tb WHERE email='" . $_POST["email"] . "'");
+                    $result = $dbCon->query("SELECT * FROM user_tb WHERE email='" . $_POST["email"] . "' AND type = '" . $_POST["type"] . "'");
                     // Fetch the result as an associative array
                     $user = $result->fetch_array();
                     if ($user > 0) { // if the user data exist on the database
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 // Set session variables for logged in user, and set timestamp for the last activity (login time)
                                 session_start();
                                 $_SESSION["loginUser"] = $user;
-                                $_SESSION["last_activity"] = time() + 600;
+                                $_SESSION["last_activity"] = time() + 10;
                             } else {
                                 $user["ecount"]--; // reduce the error count of password
                                 if ($user["ecount"] <= 0) { //Lock the user account after unsuccessful authentication attempts passes 5 times.
@@ -65,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $response = ["user" => $userData, "type" => $_SESSION["loginUser"]["type"], "sid" => session_id()];
                     echo json_encode($response);
                 } else if ($loginUser === null) { // if the email/password/type is wrong.
-                    echo json_encode(["message" => "email/password is wrong."]);
+                    echo json_encode(["message" => "type/email/password is wrong."]);
                 }
                 $dbCon->close();
                 break;
@@ -100,7 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         // hash password
                         $pass = password_hash($_POST["pass"], PASSWORD_BCRYPT, ["cost" => 10]);
                         $type = "Customer";
-                        $stmtInsert->bind_param("ssssS", $_POST["fname"], $_POST["lname"], $_POST["email"], $pass, $type);
+                        $stmtInsert->bind_param("sssss", $_POST["fname"], $_POST["lname"], $_POST["email"], $pass, $type);
 
                         if ($stmtInsert->execute()) {
                             // Registration successful
@@ -117,7 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 //register staff data
             case "/registerStaff":
-                if (isset($_SESSION["loginUser"]) && ($_SESSION["loginUser"]["type"] === "Staff" || $_SESSION["loginUser"]["type"] === "Admin")) { //check if the user login and if the user type is Staff or Admin
+                if (isset($_SESSION["loginUser"]) && ($_SESSION["loginUser"]["type"] == "Staff" || $_SESSION["loginUser"]["type"] == "Admin")) { //check if the user login and if the user type is Staff or Admin
                     $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
                     if ($dbCon->connect_error) {
                         echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
@@ -136,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             // hash password
                             $pass = password_hash($_POST["pass"], PASSWORD_BCRYPT, ["cost" => 10]);
                             $type = "Staff";
-                            $stmtInsert->bind_param("ssssS", $_POST["fname"], $_POST["lname"], $_POST["email"], $pass, $type);
+                            $stmtInsert->bind_param("sssss", $_POST["fname"], $_POST["lname"], $_POST["email"], $pass, $type);
 
                             if ($stmtInsert->execute()) {
                                 // Registration successful
@@ -144,7 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             } else {
                                 echo json_encode(["message" => "Error"]);
                             }
-
                             $stmtInsert->close();
                             $dbCon->close();
                         }
@@ -254,8 +253,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
                         $dbCon->close();
                     } else {
-                        $userData = json_encode($_POST["userData"]);
-                        if ($_SESSION["loginUser"]["uid"] === $userData["uid"]) { // staff and admin can't delete their own data
+                        $userData = json_decode($_POST["userData"], true);
+                        if ($_SESSION["loginUser"]["uid"] == $userData["uid"]) { // staff and admin can't delete their own data
                             echo json_encode(["message" => "You can't delete your own data."]);
                         } else {
                             $checkBlk = "SELECT uid FROM blacklist_tb WHERE uid = " . $userData["uid"];
@@ -380,13 +379,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 //delete tickets data
             case "/deleteTickets":
-                if (isset($_SESSION["loginUser"]) && ($_SESSION["loginUser"]["type"] === "Staff" || $_SESSION["loginUser"]["type"] === "Admin")) {
+                if (isset($_SESSION["loginUser"]) && ($_SESSION["loginUser"]["type"] == "Staff" || $_SESSION["loginUser"]["type"] == "Admin")) {
                     $dbCon = new mysqli($dbServer, $dbUser, $dbPass, $dbName);
                     if ($dbCon->connect_error) {
                         echo json_encode(["message" => "DB connection error. " . $dbCon->connect_error]);
                         $dbCon->close();
                     } else {
-                        $ticketData = json_encode($_POST["ticketData"]);
+                        $ticketData = json_decode($_POST["ticketData"], true);
                         $delTck = "DELETE FROM ticket_tb WHERE tid = " . $ticketData["tid"];
                         $dbCon->query($delTck);
                         $dbCon->close();

@@ -160,9 +160,9 @@ function Ticket() {
 
     return (
         <>
-            <h1 className="text-center fw-bolder mb-3">Ticket</h1>
+            <h1 className="text-center fw-bolder mt-4">Ticket</h1>
             <div className="container-fluid">
-                <div className="row justify-content-center align-items-center g-2" style={{display: sessionStorage.getItem("type") == "Customer" ? "block" : "none"}}>
+                <div className="row justify-content-center align-items-top g-2" style={{display: sessionStorage.getItem("type") == "Customer" ? "block" : "none"}}>
                     <div className="col-12 text-center mb-3">
                         <div className="form-group">
                             {tickets.map((ticket, idx) => { return (<TicketContent key={idx} ticket={ticket} add={addCart}/>) })}
@@ -170,19 +170,21 @@ function Ticket() {
                         <p>Total : ${total}</p>
                     </div>
                     <div className='col text-center'>
-                        <button type="button" className="btn btn-outline-primary" onClick={buyHander}>Buy</button>
+                        <button type="button" className="btn" onClick={buyHander}>Buy</button>
                     </div>
                 </div>
 
-                <div className="row justify-content-center align-items-center g-2" style={{display: !(sessionStorage.getItem("type") == "Customer") ? "block" : "none"}}>
-                    <div className="col">
+                {(sessionStorage.getItem("type") == "Staff") || (sessionStorage.getItem("type") == "Admin") ?
+                <div className="d-flex justify-content-center align-items-top g-2">
+                    <div className="flex-grow-1">
                         <div className="table-responsive">
-                            <table className="table table-primary">
+                            <table className="table table-primary text-center">
                                 <thead>
                                     <tr>
                                         <th>Ticket ID</th>
                                         <th>Type</th>
                                         <th>Price</th>
+                                        <th>Delete</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -192,20 +194,21 @@ function Ticket() {
                         </div>
                     </div>
 
-                    <div className='col'>
+                    <div className="flex-grow-1">
                         <form onSubmit={addTicket}>
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="type" value={type} onChange={e => setType(e.target.value)} placeholder="Ticket Type"/>
+                            <div className="form-floating mb-3">
+                                <input type="text" className="form-control" name="type" value={type} onChange={e => setType(e.target.value)} placeholder="Ticket Type"/>
                                 <label htmlFor="type">Type</label>
                             </div>
-                            <div class="form-floating mb-3">
-                                <input type="number" class="form-control" name="price" value={price} onChange={e => setPrice(e.target.value)} placeholder="Price"/>
+                            <div className="form-floating mb-3">
+                                <input type="number" className="form-control" name="price" value={price} onChange={e => setPrice(e.target.value)} placeholder="Price"/>
                                 <label htmlFor="price">Price</label>
                             </div>
-                            <button type="submit" class="btn btn-primary">Register</button>
+                            <button type="submit" className="btn">Register</button>
                         </form>
                     </div>
                 </div>
+                :<div></div>}
             </div>
         </>
     )

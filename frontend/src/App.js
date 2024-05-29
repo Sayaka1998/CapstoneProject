@@ -25,7 +25,7 @@ function App() {
                 <Route path='/registerStaff' element={<RegisterStaff/>} />
                 <Route path='/change' element={<Change/>}/>
                 <Route path='/deleteAccount' element={<DeleteAccount/>}/>
-                <Route path='/deleteUser' element={<DeleteUser/>}/>
+                <Route path='/userList' element={<DeleteUser/>}/>
                 <Route path='*' element={<Nopage/>}/>
             </Route>
         </Routes>

@@ -41,13 +41,13 @@ function Login() {
 
     return (
         <>
-            <h1 className="text-center fw-bolder mb-3">Log in</h1>
+            <h1 className="text-center fw-bolder mt-4 mb-3">Log in</h1>
             <div className="container-fluid">
                 <div className="row justify-content-center align-items-center g-2">
                     <div className="col-4">
                         <form onSubmit={submitHandle}>
                             <div className="form-floating mb-3">
-                                <select className="form-select form-select-lg" name="type">
+                                <select className="form-select form-select" name="type">
                                     <option defaultValue>Customer</option>
                                     <option>Staff</option>
                                     <option>Admin</option>
@@ -65,7 +65,7 @@ function Login() {
                                 <input type="checkbox" className="form-check-input" name="show" id="flexCheckDefault" checked={show} onChange={() => setShow(!show)} />
                                 <label className="form-check-label" htmlFor="flexCheckDefault">Show Password</label>
                             </div>
-                            <button type="submit" className="btn btn-outline-primary">Log in</button>
+                            <button type="submit" className="btn">Log in</button>
                         </form>
                     </div>
                 </div>

@@ -12,7 +12,7 @@ function DeleteUserRow(props) {
                 <td>{props.user.lname}</td>
                 <td>{props.user.email}</td>
                 <td>{props.user.type}</td>
-                <td><button type="button" class="btn btn-outline-danger" onClick={delUserHandler}>Delete</button></td>
+                <td><button type="button" className="btn btn-delete" onClick={delUserHandler}>Delete</button></td>
             </tr>
         </>
     )

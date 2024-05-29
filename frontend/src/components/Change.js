@@ -51,7 +51,7 @@ function Change() {
 
     return (
         <>
-            <h1 className="text-center fw-bolder mb-3">Change Password</h1>
+            <h1 className="text-center fw-bolder mt-4 mb-3">Change Password</h1>
             <div className="container-fluid">
                 <div className="row justify-content-center align-items-center g-2">
                     <div className="col-4">
@@ -77,7 +77,7 @@ function Change() {
                                 <label className="form-check-label" htmlFor="flexCheckDefault">Show Password</label>
                             </div>
                             {error && <div className="alert alert-danger">{error}</div>}
-                            <button type="submit" className="btn btn-outline-primary">Change</button>
+                            <button type="submit" className="btn">Change</button>
                         </form>
                     </div>
                 </div>

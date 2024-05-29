@@ -28,11 +28,12 @@ function RegisterStaff() {
         }
         setError("")
         let data = new FormData(e.target)
+        data.append("sid", sessionStorage.getItem("sid"))
         httpSrv.registerStaff(data).then(
             res => {
                 if (res.data.success) { // if success to register, jump to the log in page
                     alert(res.data.success)
-                    window.location.reload();
+                    nav("/userList")
                 } else if (res.data.message) { // if fail to register, show the error message
                     alert(res.data.message)
                 } else if (res.data.logout) { //if session time out, jump to the login page
@@ -50,7 +51,7 @@ function RegisterStaff() {
     }
     return(
         <>
-            <h1 className="text-center fw-bolder mb-3">Staff Registration</h1>
+            <h1 className="text-center fw-bolder mt-4 mb-3">Staff Registration</h1>
             <div className="container-fluid">
                 <div className="row justify-content-center align-items-center g-2">
                     <div className="col-4">
@@ -80,7 +81,7 @@ function RegisterStaff() {
                                 <label className="form-check-label" htmlFor="flexCheckDefault">Show Password</label>
                             </div>
                             {error && <div className="alert alert-danger">{error}</div>}
-                            <button type="submit" className="btn btn-outline-primary">Register</button>
+                            <button type="submit" className="btn">Register</button>
                         </form>
                     </div>
                 </div>

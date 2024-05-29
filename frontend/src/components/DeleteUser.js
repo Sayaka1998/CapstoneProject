@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import httpSrv from "../services/httpSrv"
 import DeleteUserRow from "./DeleteUserRow"
@@ -53,7 +53,7 @@ function DeleteUser() {
                     sessionStorage.removeItem("type")
                     nav("/login")
                 } else if (Array.isArray(res.data)) { // if success to load the data, show the data ona table
-                    setUlist(JSON.parse(res.data))
+                    setUlist(res.data)
                 }
             },
             rej => {
@@ -61,15 +61,18 @@ function DeleteUser() {
             }
         )
     }
-    loadUlist();
+    
+    useEffect(() => {
+        loadUlist()
+    },[])
 
     return(
         <>
-            <div class="container-fluid">
-                <div class="row justify-content-center align-items-center g-2">
-                    <div class="col">
-                        <div class="table-responsive">
-                            <table class="table table-primary">
+            <div className="container-fluid">
+                <div className="row justify-content-center align-items-center g-2">
+                    <div className="col">
+                        <div className="table-responsive">
+                            <table className="table table-primary text-center">
                                 <thead>
                                     <tr>
                                         <th>User ID</th>
@@ -77,6 +80,7 @@ function DeleteUser() {
                                         <th>Last name</th>
                                         <th>Email</th>
                                         <th>User type</th>
+                                        <th>Delete</th>
                                     </tr>
                                 </thead>
                                 <tbody>

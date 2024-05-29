@@ -1,18 +1,16 @@
-import { useState, useEffect } from "react"
-
 function Home() {
-    const [user, setUser] = useState(null)
 
-    useEffect(()=>{
-        if(sessionStorage.getItem("user")){
-            setUser(JSON.parse(sessionStorage.getItem("user")))
-        } 
-    },[])    
-
-    return(
+    return (
         <>
-            <h1>Home Page</h1>
-            {user && <h3>Hello, {user.fname} {user.lname} </h3>}
+            <div className="exhi-title">
+                <h1>Exhibition</h1>
+            </div>
+            <div className="exhi-img">
+                <img src="./images/painting.png" alt="painting" />
+            </div>
+            <div className="exhi-date">
+                <h3>May 13 - May 31, 2024</h3>
+            </div>
         </>
     )
 }

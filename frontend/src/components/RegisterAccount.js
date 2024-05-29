@@ -45,7 +45,7 @@ function RegisterAccount() {
 
     return (
         <>
-            <h1 className="text-center fw-bolder mb-3">Account Registration</h1>
+            <h1 className="text-center fw-bolder mt-4 mb-3">Account Registration</h1>
             <div className="container-fluid">
                 <div className="row justify-content-center align-items-center g-2">
                     <div className="col-4">
@@ -75,7 +75,7 @@ function RegisterAccount() {
                                 <label className="form-check-label" htmlFor="flexCheckDefault">Show Password</label>
                             </div>
                             {error && <div className="alert alert-danger">{error}</div>}
-                            <button type="submit" className="btn btn-outline-primary">Register</button>
+                            <button type="submit" className="btn">Register</button>
                         </form>
                     </div>
                 </div>

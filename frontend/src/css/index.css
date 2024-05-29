@@ -1,13 +1,124 @@
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  margin: 0 auto;
+  font-family: "Times New Roman", Times, serif;
+  color: rgb(35, 39, 58);
+  background-color: rgb(156, 198, 242);
+  height: 100%;
 }
 
-code {
+.entire-page{
+    min-height: 100vh;
+  position: relative;
+}
+
+/* header */
+
+.navbar {
+    background-color: rgb(248, 252, 255);
+}
+
+.nav-item a:hover {
+    color: rgb(112, 158, 223);
+}
+
+.username p{
+    padding: 15px 50px 0 0;
+}
+
+.logout-btn {
+    border: none;
+    background: transparent;
+    text-decoration-line: underline;
+}
+
+.logout-btn:hover {
+    color: rgb(112, 158, 223); 
+}
+
+/* contents */
+main {
+    position: relative;
+    padding-bottom: 50px;
+}
+
+.container-fluid{
+    padding: 20px;
+}
+
+.btn {
+    color: white;
+    border-color: white;
+}
+
+.btn:hover {
+    color: rgb(156, 198, 242);
+    background-color: white;
+}
+
+/* home */
+.exhi-title {
+    position: absolute;
+    top: 7%;
+    left: 5%;
+}
+
+.exhi-title h1{
+    font-size: 4rem;
+    font-weight: 600;
+    text-shadow: 2px 3px 3px white;
+}
+
+.exhi-img {
+    width: 100%;
+    height: 530px;
+}
+
+.exhi-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.exhi-date {
+    position: absolute;
+    bottom: 11%;
+    right: 3%;
+}
+
+.exhi-date h3 {
+    font-weight: 600;
+    text-shadow: 2px 2px 2px white;
+}
+
+/* Ticket */
+.flex-grow-1 {
+    padding: 0 20px;
+}
+
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.btn-delete:hover{
+    color: rgb(216, 71, 71);
+    border-color: rgb(216, 71, 71);;
+}
+
+/* footer */
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 50px;
+    background-color: rgb(248, 252, 255);
+  }
+
+footer p {
+    padding: 13px 0 0 15px;
+}
+
+/* code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
-}
+} */
